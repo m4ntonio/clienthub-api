@@ -2,7 +2,10 @@
 
 Projeto de API REST para cadastro de clientes com interface web simples.
 
----
+![Python](https://img.shields.io/badge/python-3.10+-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.135-green)
+![MongoDB](https://img.shields.io/badge/MongoDB-database-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## 🧠 Tecnologias
 
@@ -12,8 +15,6 @@ Projeto de API REST para cadastro de clientes com interface web simples.
 - Uvicorn
 - HTML + JavaScript (frontend)
 
----
-
 ## 📦 Funcionalidades
 
 - Criar cliente
@@ -21,8 +22,6 @@ Projeto de API REST para cadastro de clientes com interface web simples.
 - Buscar por ID
 - Atualizar cliente
 - Deletar cliente
-
----
 
 ## 🚀 Como rodar
 
