@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Cadastro de Clientes</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f6fa;
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+h2 {
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #ff6b81;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #ff4757;
+}
+
+.lista {
+    margin-top: 20px;
+}
+
+.cliente {
+    background: #f1f2f6;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Cadastro</h2>
+
+    <input id="nome" placeholder="Nome">
+    <input id="email" placeholder="Email">
+    <input id="telefone" placeholder="Telefone">
+    <input id="endereco" placeholder="Endereço">
+
+    <button onclick="cadastrar()">Cadastrar</button>
+
+    <div class="lista" id="lista"></div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000/clientes";
+
+// 🔥 cadastrar cliente
+async function cadastrar() {
+    const data = {
+        nome: document.getElementById("nome").value,
+        email: document.getElementById("email").value,
+        telefone: document.getElementById("telefone").value,
+        endereco: document.getElementById("endereco").value
+    };
+
+    await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    carregar();
+}
+
+// 🔥 carregar lista
+async function carregar() {
+    const res = await fetch(API);
+    const clientes = await res.json();
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    clientes.forEach(c => {
+        lista.innerHTML += `
+            <div class="cliente">
+                <b>${c.nome}</b><br>
+                ${c.email}<br>
+                ${c.telefone}
+            </div>
+        `;
+    });
+}
+
+// carregar ao abrir
+carregar();
+</script>
+
+</body>
+</html>
