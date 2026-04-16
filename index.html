@@ -2,22 +2,22 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Cadastro de Clientes</title>
+<title>ClientHub</title>
 
 <style>
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial;
     background: #f5f6fa;
     display: flex;
     justify-content: center;
-    margin-top: 50px;
+    margin-top: 40px;
 }
 
 .container {
+    width: 500px;
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 12px;
-    width: 400px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
@@ -28,35 +28,40 @@ h2 {
 input {
     width: 100%;
     padding: 10px;
-    margin: 8px 0;
+    margin: 6px 0;
     border-radius: 8px;
     border: 1px solid #ccc;
 }
 
 button {
-    width: 100%;
-    padding: 12px;
-    background: #ff6b81;
-    color: white;
+    padding: 10px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
+    margin-top: 5px;
 }
 
-button:hover {
+.btn-main {
+    width: 100%;
+    background: #6c5ce7;
+    color: white;
+}
+
+.btn-delete {
     background: #ff4757;
+    color: white;
 }
 
-.lista {
-    margin-top: 20px;
+.btn-edit {
+    background: #ffa502;
+    color: white;
 }
 
 .cliente {
     background: #f1f2f6;
     padding: 10px;
-    margin-top: 8px;
-    border-radius: 6px;
+    margin-top: 10px;
+    border-radius: 8px;
 }
 </style>
 </head>
@@ -64,56 +69,93 @@ button:hover {
 <body>
 
 <div class="container">
-    <h2>Cadastro</h2>
+    <h2>ClientHub</h2>
 
     <input id="nome" placeholder="Nome">
     <input id="email" placeholder="Email">
     <input id="telefone" placeholder="Telefone">
     <input id="endereco" placeholder="Endereço">
 
-    <button onclick="cadastrar()">Cadastrar</button>
+    <button class="btn-main" onclick="salvar()">Salvar</button>
 
-    <div class="lista" id="lista"></div>
+    <div id="lista"></div>
 </div>
 
 <script>
 const API = "http://127.0.0.1:8000/clientes";
 
-// 🔥 cadastrar cliente
-async function cadastrar() {
+let editId = null;
+
+// 🔥 salvar (create ou update)
+async function salvar() {
     const data = {
-        nome: document.getElementById("nome").value,
-        email: document.getElementById("email").value,
-        telefone: document.getElementById("telefone").value,
-        endereco: document.getElementById("endereco").value
+        nome: nome.value,
+        email: email.value,
+        telefone: telefone.value,
+        endereco: endereco.value
     };
 
-    await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    });
+    if (editId) {
+        await fetch(`${API}/${editId}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+        editId = null;
+    } else {
+        await fetch(API, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+    }
 
+    limpar();
     carregar();
 }
 
-// 🔥 carregar lista
+// 🔥 listar
 async function carregar() {
     const res = await fetch(API);
     const clientes = await res.json();
 
-    const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
     clientes.forEach(c => {
         lista.innerHTML += `
-            <div class="cliente">
-                <b>${c.nome}</b><br>
-                ${c.email}<br>
-                ${c.telefone}
-            </div>
-        `;
+        <div class="cliente">
+            <b>${c.nome}</b><br>
+            ${c.email}<br>
+            ${c.telefone}<br>
+
+            <button class="btn-edit" onclick='editar(${JSON.stringify(c)})'>Editar</button>
+            <button class="btn-delete" onclick="deletar('${c.id}')">Excluir</button>
+        </div>`;
     });
+}
+
+// 🔥 deletar
+async function deletar(id) {
+    await fetch(`${API}/${id}`, { method: "DELETE" });
+    carregar();
+}
+
+// 🔥 editar
+function editar(c) {
+    nome.value = c.nome;
+    email.value = c.email;
+    telefone.value = c.telefone;
+    endereco.value = c.endereco;
+
+    editId = c.id;
+}
+
+// 🔥 limpar form
+function limpar() {
+    nome.value = "";
+    email.value = "";
+    telefone.value = "";
+    endereco.value = "";
 }
 
 // carregar ao abrir

@@ -1,5 +1,4 @@
-pydantic[email]
 fastapi
 uvicorn
 pymongo
-pydantic
+pydantic[email]

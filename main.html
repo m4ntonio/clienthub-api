@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>ClientHub Dashboard</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f4f6f9;
+    display: flex;
+}
+
+.sidebar {
+    width: 200px;
+    background: #2f3542;
+    color: white;
+    height: 100vh;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.main {
+    flex: 1;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-primary { background: #3742fa; color: white; }
+.btn-danger { background: #ff4757; color: white; }
+.btn-edit { background: #ffa502; color: white; }
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table th, .table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.5);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    width:300px;
+}
+
+input {
+    width:100%;
+    margin:5px 0;
+    padding:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>ClientHub</h2>
+    <p>Dashboard</p>
+</div>
+
+<div class="main">
+    <div class="header">
+        <h2>Clientes</h2>
+        <button class="btn-primary" onclick="abrirModal()">+ Novo</button>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="lista"></tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h3>Cliente</h3>
+        <input id="nome" placeholder="Nome">
+        <input id="email" placeholder="Email">
+        <input id="telefone" placeholder="Telefone">
+        <input id="endereco" placeholder="Endereço">
+
+        <button class="btn-primary" onclick="salvar()">Salvar</button>
+        <button onclick="fecharModal()">Cancelar</button>
+    </div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000/clientes";
+let editId = null;
+
+function abrirModal() {
+    modal.style.display = "flex";
+}
+
+function fecharModal() {
+    modal.style.display = "none";
+    limpar();
+}
+
+function limpar() {
+    nome.value = "";
+    email.value = "";
+    telefone.value = "";
+    endereco.value = "";
+    editId = null;
+}
+
+async function salvar() {
+    const data = {
+        nome: nome.value,
+        email: email.value,
+        telefone: telefone.value,
+        endereco: endereco.value
+    };
+
+    if (editId) {
+        await fetch(`${API}/${editId}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+    } else {
+        await fetch(API, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+    }
+
+    fecharModal();
+    carregar();
+}
+
+async function carregar() {
+    const res = await fetch(API);
+    const clientes = await res.json();
+
+    lista.innerHTML = "";
+
+    clientes.forEach(c => {
+        lista.innerHTML += `
+        <tr>
+            <td>${c.nome}</td>
+            <td>${c.email}</td>
+            <td>
+                <button class="btn-edit" onclick='editar(${JSON.stringify(c)})'>Editar</button>
+                <button class="btn-danger" onclick="deletar('${c.id}')">Excluir</button>
+            </td>
+        </tr>`;
+    });
+}
+
+function editar(c) {
+    abrirModal();
+    nome.value = c.nome;
+    email.value = c.email;
+    telefone.value = c.telefone;
+    endereco.value = c.endereco;
+    editId = c.id;
+}
+
+async function deletar(id) {
+    if (confirm("Deseja excluir?")) {
+        await fetch(`${API}/${id}`, { method: "DELETE" });
+        carregar();
+    }
+}
+
+carregar();
+</script>
+
+</body>
+</html>
